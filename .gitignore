@@ -1,0 +1,52 @@
+# Environment & secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Runtime artifacts
+logs/
+.cache/
+
+# Data (raw + generated; the source of truth is S3 / Pinecone)
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# uv
+.uv/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Type checking
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+.claude
+
+# guides
+ROADMAP.md
+PHASE1.md

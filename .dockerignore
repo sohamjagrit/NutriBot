@@ -1,0 +1,17 @@
+# Local virtualenv (deps are installed fresh inside the image via uv)
+.venv/
+# Python caches
+__pycache__/
+*.pyc
+.cache/
+# Local runtime artifacts
+logs/
+data/feedback/
+# Secrets — never bake real keys into the image (use --env-file / Secrets Manager)
+.env
+# Dev tooling / docs not needed at runtime
+.git/
+.gitignore
+.claude/
+*.md
+ROADMAP.md

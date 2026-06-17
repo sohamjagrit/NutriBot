@@ -1,0 +1,202 @@
+[project]
+name = "nutribot"
+version = "0.1.0"
+description = "NutriBot - Production RAG Pipeline with Modular Architecture"
+authors = [{name = "Soham", email = "sohamjagrit@gmail.com"}]
+requires-python = ">=3.10"
+dependencies = [
+    # Core LLM & API
+    "groq>=0.4.0",
+    "anthropic>=0.25.0",
+    # LangChain ecosystem
+    "langchain>=0.1.0",
+    "langchain-groq>=0.1.0",
+    "langchain-huggingface>=0.0.1",
+    "langchain-community>=0.0.1",
+    "langchain-core>=0.1.0",
+    # Vector Database
+    "pinecone>=3.0.0",
+    # Embeddings & NLP
+    "sentence-transformers>=3.0.0",
+    "torch>=2.0.0",
+    "transformers>=4.30.0",
+    # Search & Ranking
+    "rank-bm25>=0.2.2",
+    "scikit-learn>=1.3.0",
+    # AWS S3
+    "boto3>=1.34.0",
+    # Web Framework
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.29.0",
+    "python-multipart>=0.0.9",
+    # Configuration & Validation
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    # Utilities
+    "requests>=2.31.0",
+    "numpy>=1.24.0",
+    "pandas>=2.3.3",
+]
+
+# Use the CPU-only PyTorch wheels on Linux (the Docker image) to avoid pulling
+# ~6GB of unused CUDA libraries. macOS torch from PyPI is already CPU-only.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
+]
+
+[project.optional-dependencies]
+# Offline PDF parsing pipeline (not needed by the serving app). Install with:
+#   uv sync --extra ingestion
+# docling pulls torchvision + heavy ML deps, so it is kept out of the runtime image.
+ingestion = [
+    "docling>=1.25.0",
+]
+
+dev = [
+    # Code quality
+    "ruff>=0.9.0",
+    "black>=23.0.0",
+    "mypy>=1.0.0",
+    "pylint>=3.0.0",
+
+    # Testing
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "pytest-mock>=3.0.0",
+    "httpx>=0.28.0",
+    "respx>=0.21.0",
+
+    # Documentation
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=2.0.0",
+]
+
+notebooks = [
+    # Jupyter environment
+    "jupyter>=1.0.0",
+    "notebook>=7.0.0",
+    "jupyterlab>=4.0.0",
+    "ipython>=8.0.0",
+
+    # Data science & analysis
+    "pandas>=2.2.0",
+    "numpy>=1.24.0",
+    "matplotlib>=3.9.0",
+    "seaborn>=0.13.0",
+    "plotly>=5.0.0",
+
+    # Evaluation metrics
+    "ragas>=0.1.0",
+]
+
+finetuning = [
+    # Fine-tuning frameworks
+    "peft>=0.7.0",
+    "bitsandbytes>=0.41.0",
+    "accelerate>=0.25.0",
+
+    # Hugging Face integration
+    "huggingface-hub>=0.19.0",
+    "datasets>=2.14.0",
+
+    # Training utilities
+    "wandb>=0.15.0",
+    "tensorboard>=2.14.0",
+]
+
+observability = [
+    # Metrics & monitoring
+    "prometheus-client>=0.19.0",
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-sdk>=1.20.0",
+    "opentelemetry-exporter-prometheus>=0.41b0",
+
+    # Logging
+    "python-json-logger>=2.0.0",
+    "structlog>=23.0.0",
+]
+
+all = [
+    "nutribot[dev,notebooks,finetuning,observability]"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+# ==================== Code Quality ====================
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "A", "C4", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-width = 4
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+include = '\.pyi?$'
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+
+[tool.pylint]
+max-line-length = 100
+disable = ["C0114", "C0115", "C0116"]
+
+# ==================== Testing ====================
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "--cov=src --cov-report=html --cov-report=term-missing"
+markers = [
+    "integration: marks tests as integration tests requiring real APIs",
+    "slow: marks tests as slow",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["*/tests/*", "*/__init__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+
+# ==================== Project Metadata ====================
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_gitignore = true
+
+[tool.pydantic]
+json_schema_extra = "computed_fields"
